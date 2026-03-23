@@ -1308,6 +1308,59 @@
 
             return `<div id="arte-export-node-internal" style="width: ${w}px; height: ${h}px; background: ${bgGeral}; color: white; display: flex; flex-direction: column; padding: 50px; box-sizing: border-box; font-family: 'Montserrat', sans-serif;">${headerHTML}<div style="display:${displayFrete}; background: linear-gradient(90deg, #D4AF37 0%, #F3E5AB 100%); color: #000; text-align: center; padding: 20px; font-size: 22px; font-weight: 800; text-transform: uppercase; border-radius: 12px; margin-bottom: 20px; letter-spacing: 2px;">🚚 Frete Grátis Para Porto Franco, Tocantinópolis e SJ do Paraíso</div>${htmlGrid}${footerHTML}</div>`;
         }
+	
+// === CÓDIGO DEFINITIVO: EDIÇÃO DE CAIXA ===
+window.abrirEdicaoVenda = function(id) {
+    // Encontra a transação exata na memória do sistema
+    const venda = vendasGlobais.find(v => v.id === id);
+    
+    if (!venda) {
+        alert("Erro: Transação não encontrada.");
+        return;
+    }
+
+    // Preenche a sua janela flutuante com os dados da venda
+    document.getElementById('edit-v-id').value = id;
+    document.getElementById('edit-v-cliente').value = venda.cliente_nome || '';
+    document.getElementById('edit-v-valor').value = venda.total || '';
+    document.getElementById('edit-v-pagamento').value = venda.forma_pagamento || '';
+    document.getElementById('edit-v-status').value = venda.status || '';
+    document.getElementById('edit-v-cod-produto').value = venda.codigo_produto || '';
+    document.getElementById('edit-v-qtd-original').value = venda.quantidade || '';
+    document.getElementById('edit-v-status-original').value = venda.status || '';
+    
+    // Abre a janela na tela
+    document.getElementById('modal-editar-venda').style.display = 'flex';
+};
+
+window.salvarEdicaoVenda = async function() {
+    // Puxa as alterações que você digitou
+    const id = document.getElementById('edit-v-id').value;
+    const clienteNovo = document.getElementById('edit-v-cliente').value;
+    const valorNovo = parseFloat(document.getElementById('edit-v-valor').value);
+    const pagamentoNovo = document.getElementById('edit-v-pagamento').value;
+    const statusNovo = document.getElementById('edit-v-status').value;
+
+    if (!id) return;
+
+    try {
+        // Salva as alterações no cofre do Google (coleção pedidos)
+        await db.collection("pedidos").doc(id).update({
+            cliente_nome: clienteNovo,
+            total: valorNovo,
+            forma_pagamento: pagamentoNovo,
+            status: statusNovo
+        });
+
+        alert("✅ Caixa atualizado com sucesso!");
+        document.getElementById('modal-editar-venda').style.display = 'none';
+        location.reload(); // Recarrega para mostrar o número atualizado
+    } catch (error) {
+        console.error("Erro ao salvar:", error);
+        alert("⚠️ Erro ao atualizar o banco de dados. Tente novamente.");
+    }
+};
+// === FIM DO CÓDIGO DEFINITIVO ===
 	</script>
 </body>
 </html>
